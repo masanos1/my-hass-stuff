@@ -2,6 +2,7 @@ blueprint:
   name: IKEA Bilresa Remote (Zigbee2MQTT device; custom actions)
   description: Automation made for IKEA Bilresa (E2489) based on Zigbee2MQTT actions.
   domain: automation
+  author: Matei Asan
   input:
     remote_device:
       name: Bilresa Remote
