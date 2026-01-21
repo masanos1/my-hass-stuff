@@ -20,7 +20,7 @@ blueprint:
             domain: light
     transition_speed:
       name: Transition Speed
-      description: Time (in seconds) for transition in brightness. Anything below 0.5s may cause issues.
+      description: Time (in seconds) for transition in brightness. Anything below 0.5s may cause issues. You may want to increase with higher brightness steps.
       default: 0.5
       selector:
         number:
@@ -28,6 +28,16 @@ blueprint:
           max: 2.0
           step: 0.1
           unit_of_measurement: s
+    brightness_step:
+      name: Brightness Step
+      description: The percentage to increase or decrease brightness by in each step.
+      default: 10
+      selector:
+        number:
+          min: 1
+          max: 50
+          step: 1
+          unit_of_measurement: "%"
 
 mode: restart
 max_exceeded: silent
@@ -65,6 +75,11 @@ trigger:
     id: "stop"
 
 action:
+  - variables:
+      # Defining inputs as variables so they are accessible in templates
+      step_value: !input brightness_step
+      trans_speed: !input transition_speed
+
   - choose:
       - conditions: "{{ trigger.id == 'on' }}"
         sequence:
@@ -90,9 +105,9 @@ action:
                 - service: light.turn_on
                   target: !input target_light
                   data:
-                    brightness_step_pct: 15
-                    transition: !input transition_speed
-                - delay: !input transition_speed
+                    brightness_step_pct: "{{ step_value }}"
+                    transition: "{{ trans_speed }}"
+                - delay: "{{ trans_speed }}"
 
       - conditions: "{{ trigger.id == 'down' }}"
         sequence:
@@ -104,9 +119,9 @@ action:
                 - service: light.turn_on
                   target: !input target_light
                   data:
-                    brightness_step_pct: -15
-                    transition: !input transition_speed
-                - delay: !input transition_speed
+                    brightness_step_pct: "{{ step_value * -1 }}"
+                    transition: "{{ trans_speed }}"
+                - delay: "{{ trans_speed }}"
 
       - conditions: "{{ trigger.id == 'stop' }}"
         sequence:
